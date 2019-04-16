@@ -6,19 +6,22 @@
 
 int main()
 {
-	/*파일 데이터를 가져와 메모리 할당*/
+	/*-----------파일을 열고 프레임 개수별 메모리 할당--------------*/
 	FILE *pfile,*cfile = NULL;//파일 구조체 선언
 
 	pfile = fopen("PeopleOnStreet_1280x720_30_Original.yuv", "rb");
 	cfile = fopen("PeopleOnStreet_1280x720_30_Recons.yuv", "rb");
 	///파일을 이진읽기 전용으로 열기
 
-	int resolution_size = 1280 * 720;//해상도 크기
-	unsigned char **read_data_o = new unsigned char*[FRAME_NUM];//프레임 개수만큼의 동적 메모리 할당
-	unsigned char **read_data_r = new unsigned char*[FRAME_NUM];	
 	size_t n_size;//1 frame 크기, 읽어온 바이트 스트림 개수 저장 하는 변수
-	double mse_s = 0,rmse_s = 0;
+	double mse_s = 0, rmse_s = 0;
+	int resolution_size = 1280 * 720;//해상도 크기
+	unsigned char **read_data_o = new unsigned char*[FRAME_NUM];
+	unsigned char **read_data_r = new unsigned char*[FRAME_NUM];
+	//프레임 개수만큼 이중포인터에 동적 메모리 할당 -> read_data[30][] 형태
+	/*-------------------------------------------------------------*/
 
+	/*-----------파일 데이터를 가져와 메모리 할당 + 프레임마다 y값 산출하여 MSE, RMSE(=Root(MSE)), PSNR 계산--------------*/
 	if (pfile == NULL)
 	{
 		fputs("File error", stderr);
@@ -43,27 +46,26 @@ int main()
 			double result = 0;
 			int subtr = 0;
 			for (int j = 0; j < (int)n_size; j++) {
-				//UVindex 첫 인자값 확인 
-				//if (j == resolution_size-1) printf("%d %d\n", read_data_o[i][j], read_data_r[i][j]);
-				if (j >= resolution_size) break;
+				if (j >= resolution_size) break; 
+				// 이차원배열의 [frame][0-(resolution-1)]:y 데이터, [frame][resolution-(resolution*3/2-1)]:u&v 데이터
+				//==yuv420 파일의 특성 때문
 				subtr = read_data_o[i][j] - read_data_r[i][j];
 				result += pow(subtr, 2);
-
-
 			}
+
 			mse_s += (result / resolution_size);
 			rmse_s += sqrt((result / resolution_size));
-			printf("mse: %.f rmse: %f\n", (result / resolution_size),sqrt((result / resolution_size)));
+			printf("MSE: %.f RMSE: %f\n", (result / resolution_size),sqrt((result / resolution_size)));//프레임당 MSE,RMSE 값 출력
 		}
-	
-		printf("mse의 평균: %.f\nrmse의 평균: %f\n", mse_s / 30, rmse_s / 30);
+
+		printf("mse의 평균: %.f\nrmse의 평균: %f\n", mse_s / 30, rmse_s / 30);//30프레임 동안의 MSE,RMSE값의 평균
 		double psnr = 0;
-		psnr = 10*log10(255*255/(mse_s/30));
-		printf("psnr = %f(db)", psnr);
+		psnr = 10*log10(255*255/(mse_s/30));//30프레임의 평균 값으로 PSNR 계산
+		printf("PSNR = %f(db)", psnr);
 
 	}
-	
-	    fclose(cfile);
+	/*--------------------------------------------------------------------------------------------------------------------*/
+	    fclose(cfile);//파일 닫기
 		fclose(pfile);
 		
 
