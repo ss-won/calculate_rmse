@@ -1,4 +1,6 @@
-# < 영상의 픽셀 차이의 제곱근(rmse) 계산하기 >
+#  영상의 픽셀 차이의 제곱근(rmse) 계산하기 
+> [cpp souce code](https://github.com/ss-won/calculate_rmse/blob/master/yuvdata.cpp)는 여기를 참조하세요.
+
 - YUV420 파일의 픽셀 저장 방식
 ![YUV420](https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Yuv420.svg/800px-Yuv420.svg.png "YUV420파일의 픽셀 저장 방식")
 - 여기서 MSE = 차이의 제곱의 합 RMSE = MSE의 루트값(제곱근)
@@ -95,8 +97,7 @@ FILE *fout = NULL;
 ```
 ***
 
-**끝나면** 꼭 메모리 
-반납 해주세욘 !
+**끝나면** 꼭 메모리 반납을 해야합니다!
 ```c
 for(int i=0;i<1280*720;i++){
  delete[] read_data_o[i];
